@@ -80,36 +80,34 @@ while True:
 
         if val > 5:
             
-            print("Over 5grams, checking weights")
+            #print("Over 5grams, checking weights")
                 
             if int(val) != int(sameVal):
                 sameVal = val
                 count = 0
             else:
                 count += 1
-                # print(count)
+                print(count)
                 if count > 6:
                     # print(int(val) , " as appeared 6 times in a row!!! Matches with the sameVal " , int(sameVal))
                     count = 0
                     
                     # Here goes the code to send the value to the server!!! #
                     bearerTkn = 'miTQ1NwbocCI?A2uyop1?VN=l3wh?kebR6WuepYJCOFfzWqGImXfiO/Ksed5pAxQBP8km8qU!6RmhehCPlF5D7TZm?R8w4bH8JpQXxrgABVDfAHyC9yBp3M2zxCQN13-oSf-fJhqjY-X9HlyMyq6y3Rm486eOx5VGWt!upDx-Y3CorzLs747otpnGEcfOQozNoSzJqlC!PZGypR22j/2DD1jzuCml!eHjfkX=sT8lQYqabuOnAJ/fhI6HKdo1p0X'
-                    url = 'https://nutrition-app-weight.onrender.com/weight'
+                    url = 'https://nutrition-calculation-app.onrender.com/api/v1/nutrition'
                     
                     response = requests.post(
                                 url, 
-                                json = {"weight": int(val)},
+                                json = {"data": {"food" : "chicken", "grams": int(val)}},
                                 headers = {"Authorization": f"Bearer {bearerTkn}" })
-                       
-                       
-                    print("post request sent with " , int(val))
-                    print(response)
                     
+                    print(response.json)
+                    print("Post complete!")
                     cleanAndExit()
                  
                 # End of code #
-        else:
-            print("Weight below 5 grams, rechecking")
+        #else:
+            #print("Weight below 5 grams, rechecking")
 
         hx.power_down()
         hx.power_up()
