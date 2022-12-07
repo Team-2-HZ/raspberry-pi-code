@@ -5,6 +5,10 @@ import time
 import sys
 import requests
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 EMULATE_HX711=False
 
@@ -30,7 +34,6 @@ def cleanAndExit():
         
     print("Bye!")
     sys.exit()
-    
 
 hx = HX711(5, 6)
 
@@ -63,27 +66,13 @@ print("Tare done! Add weight now...")
 
 while True:
     try:
-        # These three lines are usefull to debug wether to use MSB or LSB in the reading formats
-        # for the first parameter of "hx.set_reading_format("LSB", "MSB")".
-        # Comment the two lines "val = hx.get_weight(5)" and "print val" and uncomment these three lines to see what it prints.
-        
-        # np_arr8_string = hx.get_np_arr8_string()
-        # binary_string = hx.get_binary_string()
-        # print binary_string + " " + np_arr8_string
-        
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         val = hx.get_weight(5)
         print(val)
 
-        # To get weight from both channels (if you have load cells hooked up 
-        # to both channel A and B), do something like this
-        #val_A = hx.get_weight_A(5)
-        #val_B = hx.get_weight_B(5)
-        #print "A: %s  B: %s" % ( val_A, val_B )
-
         # Check if weight is not fluctuating and record the stable measurement
         if val > 5:
-            if int(val) != int(sameVal):
+            if int(val) != (int(sameVal) + 1) or int(val) != (int(sameVal - 1)):
                 sameVal = val
                 count = 0
             else:
@@ -97,40 +86,41 @@ while True:
                     print("Starting Camera")
                     camera.start_preview()
                     time.sleep(5)
-                    camera.capture('/home/pi/Desktop/FoodImage.jpg')
+                    camera.capture(os.getenv('IMG_FILE_PATH'))
                     print("Picture Captured")
                     camera.stop_preview()
                     # End of camera code
                     
-                    ## TODO - Fix this to send the image to the server ##
+                    ## TODO - Fix this to send the image to the server 
+                    ## TODO - Test connection to Daniel's image recognition code
                     # Code to post camera image to database/server
                     print('Sending image to the database')                    
-                    imgUrl = 'https://6389cff34eccb986e89b39dd.mockapi.io/foodscan/images'
-                    imgFile = { 'file': open('/home/pi/Desktop/FoodImage.jpg', 'rb')}
+                    imgUrl = os.getenv('IMG_RECOG_URL')
+                    imgFile = { 'file': open(os.getenv('IMG_FILE_PATH'), 'rb')}
 
                     imgResponse = requests.post(imgUrl, files = imgFile)
-                    print(imgResponse)
+                    print(imgResponse.json)
                     print('Finished sending image\n')
                     # End of Code
-                    
+
                     # Here goes the code to send the value to the server!!! #
-                    bearerTkn = 'miTQ1NwbocCI?A2uyop1?VN=l3wh?kebR6WuepYJCOFfzWqGImXfiO/Ksed5pAxQBP8km8qU!6RmhehCPlF5D7TZm?R8w4bH8JpQXxrgABVDfAHyC9yBp3M2zxCQN13-oSf-fJhqjY-X9HlyMyq6y3Rm486eOx5VGWt!upDx-Y3CorzLs747otpnGEcfOQozNoSzJqlC!PZGypR22j/2DD1jzuCml!eHjfkX=sT8lQYqabuOnAJ/fhI6HKdo1p0X'
-                    # apiUrl = 'https://nutrition-calculation-app.onrender.com/api/v1/nutrition'
-                    
-                    apiUrl = 'http://nutri.larskra.de/api/v1/nutrition'
+                    bearerTkn = os.getenv('BEARER_TOKEN')
+                    apiUrl = os.getenv('NUTRI_CALC_URL')
+
+                    data = {"food":imgResponse,"grams":int(val)}
+
+                    payload = json.dumps(data)
                     
                     # response = requests.post(
-                    #            apiUrl, 
-                    #            json = {"data":{"food":"chicken","grams":int(val)}},
-                    #            headers = {"Authorization": f"Bearer {bearerTkn}" })
+                                # apiUrl, 
+                                # # json = {"data":{"food":imgResponse,"grams":int(val)}},
+                                # payload,
+                                # headers = {"Authorization": f"Bearer {bearerTkn}" })
                     
-                    #print(response.json)
-                    print("Post complete!")
-                    cleanAndExit()
-                 
-                # End of code #
-        #else:
-            #print("Weight below 5 grams, rechecking")
+                    # print(response.json)
+                    # print("Post complete!")
+                    cleanAndExit()                
+                    # End of code #
 
         hx.power_down()
         hx.power_up()
