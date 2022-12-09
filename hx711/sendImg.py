@@ -14,8 +14,6 @@ def sendImage():
     imgResponse = requests.post(imgUrl, files=imgFile, data={'weight': weight})
     # descrupt the response
     imgResponse = imgResponse.json()
-    # print(imgResponse['food'])
-    # print(imgResponse['grams'])
 
 
 sendImage()
