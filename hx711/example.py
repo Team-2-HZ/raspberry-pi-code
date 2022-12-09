@@ -92,26 +92,7 @@ while True:
                     camera.capture('./images/image_1.jpg')
                     print("Picture Captured")
                     camera.stop_preview()
-                    # End of camera code
-                    # sendImage(val)
-                    # End of Code
 
-                    # Here goes the code to send the value to the server!!! #
-                    bearerTkn = os.getenv('BEARER_TOKEN')
-                    apiUrl = os.getenv('NUTRI_CALC_URL')
-
-                    data = {"food": imgResponse, "grams": int(val)}
-
-                    payload = json.dumps(data)
-
-                    # response = requests.post(
-                    # apiUrl,
-                    # # json = {"data":{"food":imgResponse,"grams":int(val)}},
-                    # payload,
-                    # headers = {"Authorization": f"Bearer {bearerTkn}" })
-
-                    # print(response.json)
-                    # print("Post complete!")
                     cleanAndExit()
                     # End of code #
 
