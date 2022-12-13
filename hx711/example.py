@@ -7,6 +7,7 @@ from sendImg import sendImage
 
 EMULATE_HX711 = False
 
+
 camera = PiCamera()
 
 referenceUnit = 449.324
@@ -32,8 +33,10 @@ def cleanAndExit():
     sys.exit()
 
 
+# Identify the RPi pins connected to the scales
 hx = HX711(5, 6)
 
+# IN THE EVEN OF RANDOM VALUES - Description from original repo's author
 # I've found out that, for some reason, the order of the bytes is not always the same between versions of python, numpy and the hx711 itself.
 # Still need to figure out why does it change.
 # If you're experiencing super random values, change these values to MSB or LSB until to get more stable values.
@@ -43,12 +46,13 @@ hx = HX711(5, 6)
 # According to the HX711 Datasheet, the second parameter is MSB so you shouldn't need to modify it.
 hx.set_reading_format("MSB", "MSB")
 
-# HOW TO CALCULATE THE REFFERENCE UNIT
+# HOW TO CALCULATE THE REFFERENCE UNIT - Example from original repo's author
 # To set the reference unit to 1. Put 1kg on your sensor or anything you have and know exactly how much it weights.
 # In this case, 92 is 1 gram because, with 1 as a reference unit I got numbers near 0 without any weight
 # and I got numbers around 184000 when I added 2kg. So, according to the rule of thirds:
 # If 2000 grams is 184000 then 1000 grams is 184000 / 2000 = 92.
 # hx.set_reference_unit(113)
+
 hx.set_reference_unit(referenceUnit)
 
 hx.reset()
@@ -57,9 +61,9 @@ hx.tare()
 
 print("Tare done! Add weight now...")
 
-# to use both channels, you'll need to tare them both
-# hx.tare_A()
-# hx.tare_B()
+# To use both channels, you'll need to tare them both
+#hx.tare_A()
+#hx.tare_B()
 
 while True:
     try:
@@ -83,6 +87,7 @@ while True:
                     print("Starting Camera")
                     camera.start_preview()
                     time.sleep(5)
+
                     camera.capture('./images/image_1.jpg')
                     print("Picture Captured")
                     camera.stop_preview()
@@ -90,7 +95,7 @@ while True:
                     sendImage(weight)
 
                     cleanAndExit()
-                    # End of code #
+        # End of code #
 
         hx.power_down()
         hx.power_up()
