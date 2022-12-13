@@ -62,8 +62,8 @@ hx.tare()
 print("Tare done! Add weight now...")
 
 # To use both channels, you'll need to tare them both
-#hx.tare_A()
-#hx.tare_B()
+# hx.tare_A()
+# hx.tare_B()
 
 while True:
     try:
@@ -73,7 +73,7 @@ while True:
 
         # Check if weight is not fluctuating and record the stable measurement
         if weight > 5:
-            if int(weight) != (int(sameWeight) + - 1) or int(weight) != (int(sameWeight - 1)):
+            if int(weight) != (int(sameWeight) + 1) or int(weight) != (int(sameWeight) - 1):
                 sameWeight = weight
                 count = 0
             else:
@@ -87,7 +87,6 @@ while True:
                     print("Starting Camera")
                     camera.start_preview()
                     time.sleep(5)
-
                     camera.capture('./images/image_1.jpg')
                     print("Picture Captured")
                     camera.stop_preview()
@@ -95,7 +94,7 @@ while True:
                     sendImage(weight)
 
                     cleanAndExit()
-        # End of code #
+                    # End of code #
 
         hx.power_down()
         hx.power_up()
