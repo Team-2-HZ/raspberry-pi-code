@@ -3,13 +3,7 @@
 from picamera import PiCamera
 import time
 import sys
-import requests
-import json
-import os
-from dotenv import load_dotenv
 from sendImg import sendImage
-
-load_dotenv()
 
 EMULATE_HX711 = False
 
@@ -17,7 +11,7 @@ camera = PiCamera()
 
 referenceUnit = 449.324
 
-sameVal = 0
+sameWeight = 0
 
 count = 0
 
@@ -70,13 +64,13 @@ print("Tare done! Add weight now...")
 while True:
     try:
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
-        val = hx.get_weight(5)
-        print(val)
+        weight = hx.get_weight(5)
+        print(weight)
 
         # Check if weight is not fluctuating and record the stable measurement
-        if val > 5:
-            if int(val) != (int(sameVal) + 1) or int(val) != (int(sameVal - 1)):
-                sameVal = val
+        if weight > 5:
+            if int(weight) != (int(sameWeight) + - 1) or int(weight) != (int(sameWeight - 1)):
+                sameWeight = weight
                 count = 0
             else:
                 count += 1
@@ -92,6 +86,8 @@ while True:
                     camera.capture('./images/image_1.jpg')
                     print("Picture Captured")
                     camera.stop_preview()
+
+                    sendImage(weight)
 
                     cleanAndExit()
                     # End of code #
