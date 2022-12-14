@@ -62,8 +62,8 @@ hx.tare()
 print("Tare done! Add weight now...")
 
 # To use both channels, you'll need to tare them both
-# hx.tare_A()
-# hx.tare_B()
+#hx.tare_A()
+#hx.tare_B()
 
 while True:
     try:
@@ -74,7 +74,6 @@ while True:
         # Check if weight is not fluctuating and record the stable measurement
         if weight > 5:
             if int(weight) != int(sameWeight):
-
                 sameWeight = weight
                 count = 0
             else:
