@@ -69,11 +69,11 @@ while True:
     try:
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         weight = hx.get_weight(5)
-        print(weight)
+        print(int(weight))
 
         # Check if weight is not fluctuating and record the stable measurement
         if weight > 5:
-            if int(weight) != (int(sameWeight) + - 1) or int(weight) != (int(sameWeight - 1)):
+            if int(weight) != int(sameWeight):
                 sameWeight = weight
                 count = 0
             else:
