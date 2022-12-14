@@ -1,14 +1,12 @@
 #! /usr/bin/python2
 
-from picamera import PiCamera
+# from picamera import PiCamera
 import time
 import sys
 from sendImg import sendImage
+from captureImg import captureImg
 
 EMULATE_HX711 = False
-
-
-camera = PiCamera()
 
 referenceUnit = 449.324
 
@@ -81,20 +79,15 @@ while True:
                 print(count)
                 if count > 6:
                     count = 0
-                    print("Sending weight to server")
 
-                    # Code to call on camera and take photo
-                    print("Starting Camera")
-                    camera.start_preview()
-                    time.sleep(5)
-                    camera.capture('./images/image_1.jpg')
-                    print("Picture Captured")
-                    camera.stop_preview()
+                    # Call code to take photo
+                    captureImg()
 
+                    # Call code to send photo and weight details via POST request
+                    print("Sending weight and photo to server")
                     sendImage(weight)
 
                     cleanAndExit()
-                    # End of code #
 
         hx.power_down()
         hx.power_up()
