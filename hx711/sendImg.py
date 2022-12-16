@@ -1,7 +1,7 @@
 import requests
 
 imgPath = './images/image_1.jpg'
-imgUrl = 'http://localhost:8000/post/image'
+imgUrl = 'https://python-img-classification.onrender.com/post/image'
 
 
 def sendImage(weight):
