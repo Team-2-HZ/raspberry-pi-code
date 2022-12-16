@@ -89,6 +89,7 @@ while True:
 
                     cleanAndExit()
 
+
         hx.power_down()
         hx.power_up()
         time.sleep(0.5)
