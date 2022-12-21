@@ -5,6 +5,10 @@ import time
 import sys
 from sendImg import sendImage
 from captureImg import captureImg
+from Adafruit_CharLCD import Adafruit_CharLCD
+
+lcd = Adafruit_CharLCD(rs=25, en=24, d4=23, d5=17,
+                       d6=27, d7=22, cols=16, lines=2)
 
 EMULATE_HX711 = False
 
@@ -29,6 +33,11 @@ def cleanAndExit():
 
     print("Bye!")
     sys.exit()
+
+# Clear LCD text and set cursor to the start position
+def refreshLcd():
+    lcd.clear()
+    lcd.home()
 
 
 # Identify the RPi pins connected to the scales
@@ -59,18 +68,23 @@ hx.tare()
 
 print("Tare done! Add weight now...")
 
+refreshLcd()
+lcd.message("Ready to start")
+
 # To use both channels, you'll need to tare them both
-#hx.tare_A()
-#hx.tare_B()
+# hx.tare_A()
+# hx.tare_B()
 
 while True:
     try:
+        refreshLcd()
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         weight = hx.get_weight(5)
         print(int(weight))
+        lcd.message(weight,"g")
 
         # Check if weight is not fluctuating and record the stable measurement
-        if weight > 5:
+        if weight >= 5:
             if int(weight) != int(sameWeight):
                 sameWeight = weight
                 count = 0
@@ -79,6 +93,9 @@ while True:
                 print(count)
                 if count > 6:
                     count = 0
+                    
+                    refreshLcd()
+                    lcd.message("Processing...")
 
                     # Call code to take photo
                     captureImg()
@@ -87,8 +104,17 @@ while True:
                     print("Sending weight and photo to server")
                     sendImage(weight)
 
+                    
+                    refreshLcd()
+                    lcd.message("Information Sent")
+                    time.sleep(3)
+                    lcd.message("Check App for\nmore information")
+                    
                     cleanAndExit()
-
+                    
+        elif weight > 0 and weight < 5:
+            refreshLcd()
+            lcd.message("Place food\non scale")
 
         hx.power_down()
         hx.power_up()
