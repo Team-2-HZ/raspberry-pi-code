@@ -1,12 +1,34 @@
 #! /usr/bin/python2
 
-# from picamera import PiCamera
 import time
 import sys
 from sendImg import sendImage
 from captureImg import captureImg
+from Adafruit_CharLCD import Adafruit_CharLCD
 
 EMULATE_HX711 = False
+if not EMULATE_HX711:
+    import RPi.GPIO as GPIO
+    from hx711 import HX711
+else:
+    from emulated_hx711 import HX711
+
+# Specify the LCD connections
+lcd = Adafruit_CharLCD(rs=25, en=24, d4=23, d5=17,
+                       d6=27, d7=22, cols=16, lines=2)
+
+# Set up the buttons
+GPIO.setmode(GPIO.BCM)
+
+# Specify the Button connections
+WEIGH_BUTTON = 26
+SEND_DETAILS_BUTTON = 19
+TARE_BUTTON = 13
+
+# Set up the button inputs
+GPIO.setup(WEIGH_BUTTON, GPIO.IN)
+GPIO.setup(SEND_DETAILS_BUTTON, GPIO.IN)
+GPIO.setup(TARE_BUTTON, GPIO.IN)
 
 referenceUnit = 449.324
 
@@ -14,13 +36,7 @@ sameWeight = 0
 
 count = 0
 
-if not EMULATE_HX711:
-    import RPi.GPIO as GPIO
-    from hx711 import HX711
-else:
-    from emulated_hx711 import HX711
-
-
+# Clean the GPIO connection
 def cleanAndExit():
     print("Cleaning...")
 
@@ -29,6 +45,18 @@ def cleanAndExit():
 
     print("Bye!")
     sys.exit()
+
+
+# Refresh LCD, clearing the text and seting cursor to the start position
+def refreshLcd():
+    lcd.clear()
+    lcd.home()
+
+
+# Display the weight value from the scale
+def displayWeight(weight):
+    refreshLcd()
+    lcd.message(weight, "g")
 
 
 # Identify the RPi pins connected to the scales
@@ -59,36 +87,53 @@ hx.tare()
 
 print("Tare done! Add weight now...")
 
+refreshLcd()
+lcd.message("Ready to start")
+
 # To use both channels, you'll need to tare them both
-#hx.tare_A()
-#hx.tare_B()
+# hx.tare_A()
+# hx.tare_B()
 
 while True:
     try:
-        # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         weight = hx.get_weight(5)
         print(int(weight))
 
-        # Check if weight is not fluctuating and record the stable measurement
-        if weight > 5:
-            if int(weight) != int(sameWeight):
-                sameWeight = weight
-                count = 0
-            else:
-                count += 1
-                print(count)
-                if count > 6:
+        if GPIO.input(WEIGH_BUTTON):
+            displayWeight(weight)
+        elif GPIO.input(SEND_DETAILS_BUTTON):
+            # Check if weight is not fluctuating and record the stable measurement
+            if weight >= 5:
+                if int(weight) != int(sameWeight):
+                    sameWeight = weight
                     count = 0
+                else:
+                    count += 1
+                    print(count)
+                    if count > 6:
+                        count = 0
 
-                    # Call code to take photo
-                    captureImg()
+                        refreshLcd()
+                        lcd.message("Processing...")
 
-                    # Call code to send photo and weight details via POST request
-                    print("Sending weight and photo to server")
-                    sendImage(weight)
+                        # Call code to take photo
+                        captureImg()
 
-                    cleanAndExit()
+                        # Call code to send photo and weight details via POST request
+                        print("Sending weight and photo to server")
+                        sendImage(weight)
 
+                        refreshLcd()
+                        lcd.message("Information Sent")
+                        time.sleep(3)
+                        lcd.message("Check App for\nmore information")
+
+                        cleanAndExit()
+        elif GPIO.input(TARE_BUTTON):
+            hx.tare()
+        elif weight > 0 and weight < 5:
+            refreshLcd()
+            lcd.message("Place food\non scale")
 
         hx.power_down()
         hx.power_up()
