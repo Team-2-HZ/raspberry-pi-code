@@ -1,6 +1,5 @@
 #! /usr/bin/python2
 
-# from picamera import PiCamera
 import time
 import sys
 from sendImg import sendImage
@@ -81,7 +80,7 @@ while True:
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         weight = hx.get_weight(5)
         print(int(weight))
-        lcd.message(weight,"g")
+        lcd.message(weight, "g")
 
         # Check if weight is not fluctuating and record the stable measurement
         if weight >= 5:
@@ -93,7 +92,7 @@ while True:
                 print(count)
                 if count > 6:
                     count = 0
-                    
+
                     refreshLcd()
                     lcd.message("Processing...")
 
@@ -104,14 +103,13 @@ while True:
                     print("Sending weight and photo to server")
                     sendImage(weight)
 
-                    
                     refreshLcd()
                     lcd.message("Information Sent")
                     time.sleep(3)
                     lcd.message("Check App for\nmore information")
-                    
+
                     cleanAndExit()
-                    
+
         elif weight > 0 and weight < 5:
             refreshLcd()
             lcd.message("Place food\non scale")
