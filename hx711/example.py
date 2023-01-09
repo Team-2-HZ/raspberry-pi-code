@@ -103,7 +103,6 @@ while True:
         weightList = list()
         weightList.extend(str(int(weight)))
         weightList.append("g")
-        print (GPIO.input(WEIGH_BUTTON))
 
         if GPIO.input(WEIGH_BUTTON):
             displayWeight(weightList)
@@ -149,4 +148,8 @@ while True:
         time.sleep(0.5)
 
     except (KeyboardInterrupt, SystemExit):
+        refreshLcd()
+        lcd.message("Powering off...")
+        time.sleep(3)
+        refreshLcd()
         cleanAndExit()
