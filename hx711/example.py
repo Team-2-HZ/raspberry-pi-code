@@ -80,7 +80,10 @@ while True:
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
         weight = hx.get_weight(5)
         print(int(weight))
-        lcd.message(weight, "g")
+        weightList = list()
+        weightList.extend(str(int(weight)))
+        weightList.append("g")
+        lcd.message(weightList)
 
         # Check if weight is not fluctuating and record the stable measurement
         if weight >= 5:
@@ -119,4 +122,9 @@ while True:
         time.sleep(0.5)
 
     except (KeyboardInterrupt, SystemExit):
+        refreshLcd()
+        lcd.message("Powering off...")
+        time.sleep(3)
+        refreshLcd()
         cleanAndExit()
+
