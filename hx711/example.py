@@ -113,7 +113,7 @@ while True:
 
                     cleanAndExit()
 
-        elif weight > 0 and weight < 5:
+        elif weight >= 0 and weight < 5:
             refreshLcd()
             lcd.message("Place food\non scale")
 
