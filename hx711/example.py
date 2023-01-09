@@ -2,6 +2,7 @@
 
 import time
 import sys
+import glob
 from sendImg import sendImage
 from captureImg import captureImg
 from Adafruit_CharLCD import Adafruit_CharLCD
@@ -56,7 +57,7 @@ def refreshLcd():
 # Display the weight value from the scale
 def displayWeight(weight):
     refreshLcd()
-    lcd.message(weight, "g")
+    lcd.message(weight)
 
 
 # Identify the RPi pins connected to the scales
@@ -96,12 +97,19 @@ lcd.message("Ready to start")
 
 while True:
     try:
+        refreshLcd()
         weight = hx.get_weight(5)
         print(int(weight))
+        weightList = list()
+        weightList.extend(str(int(weight)))
+        weightList.append("g")
+        print (GPIO.input(WEIGH_BUTTON))
 
         if GPIO.input(WEIGH_BUTTON):
-            displayWeight(weight)
+            displayWeight(weightList)
+            print("Pressed White Button")
         elif GPIO.input(SEND_DETAILS_BUTTON):
+            print("Pressed Yellow Button")
             # Check if weight is not fluctuating and record the stable measurement
             if weight >= 5:
                 if int(weight) != int(sameWeight):
@@ -130,8 +138,9 @@ while True:
 
                         cleanAndExit()
         elif GPIO.input(TARE_BUTTON):
+            print("Pressed Red Button")
             hx.tare()
-        elif weight > 0 and weight < 5:
+        elif weight >= 0 and weight < 5:
             refreshLcd()
             lcd.message("Place food\non scale")
 
