@@ -98,9 +98,9 @@ while True:
         # Button command checks to activate the weighing functionality
         if GPIO.input(WEIGH_BUTTON):
                 runScales = True
-                print("Pressed the Weigh Button")
+                print("Pressed the Start Weighing Button")
         elif GPIO.input(TARE_BUTTON):
-                print("Pressed the Tare Button")
+                print("Pressed the Power Off Button")
                 exitProgram()
         
         # Code for the scales' operation
@@ -126,7 +126,7 @@ while True:
                     time.sleep(3)
 
                     # Call code to take photo
-                    #captureImg()
+                    captureImg()
                     refreshLcd()
                     lcd.message("Processing...")
                     # Call code to send photo and weight details via POST request
