@@ -51,6 +51,11 @@ def cleanAndExit():
     print("Bye!")
     sys.exit()
 
+# Clear LCD text and set cursor to the start position
+def refreshLcd():
+    lcd.clear()
+    lcd.home()
+
 
 # Refresh LCD, clearing the text and seting cursor to the start position
 def refreshLcd():
@@ -98,6 +103,9 @@ hx.tare()
 
 print("Tare done! Add weight now...")
 
+refreshLcd()
+lcd.message("Ready to start")
+
 # To use both channels, you'll need to tare them both
 # hx.tare_A()
 # hx.tare_B()
@@ -131,6 +139,10 @@ while True:
                 print("Pressed the Send Details Button")
                 # Check if weight is not fluctuating and record the stable measurement
                 if weight >= 5:
+                    refreshLcd()
+                    lcd.message("Processing...")
+
+
                     refreshLcd()
                     lcd.message("Processing...")
 
