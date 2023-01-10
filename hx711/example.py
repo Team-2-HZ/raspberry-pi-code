@@ -6,13 +6,15 @@ import glob
 from sendImg import sendImage
 from captureImg import captureImg
 from Adafruit_CharLCD import Adafruit_CharLCD
+import RPi.GPIO as GPIO
+from hx711 import HX711
 
-EMULATE_HX711 = False
-if not EMULATE_HX711:
-    import RPi.GPIO as GPIO
-    from hx711 import HX711
-else:
-    from emulated_hx711 import HX711
+# EMULATE_HX711 = False
+#if not EMULATE_HX711:
+#    import RPi.GPIO as GPIO
+#    from hx711 import HX711
+#else:
+#    from emulated_hx711 import HX711
 
 # Specify the LCD connections
 lcd = Adafruit_CharLCD(rs=25, en=24, d4=23, d5=17,
@@ -37,12 +39,14 @@ sameWeight = 0
 
 count = 0
 
+runScales = False
+
 # Clean the GPIO connection
 def cleanAndExit():
     print("Cleaning...")
 
-    if not EMULATE_HX711:
-        GPIO.cleanup()
+#    if not EMULATE_HX711:
+    GPIO.cleanup()
 
     print("Bye!")
     sys.exit()
@@ -58,7 +62,13 @@ def refreshLcd():
 def displayWeight(weight):
     refreshLcd()
     lcd.message(weight)
-
+    
+def exitProgram():
+    refreshLcd()
+    lcd.message("Powering off...")
+    time.sleep(3)
+    refreshLcd()
+    cleanAndExit()
 
 # Identify the RPi pins connected to the scales
 hx = HX711(5, 6)
@@ -88,9 +98,6 @@ hx.tare()
 
 print("Tare done! Add weight now...")
 
-refreshLcd()
-lcd.message("Ready to start")
-
 # To use both channels, you'll need to tare them both
 # hx.tare_A()
 # hx.tare_B()
@@ -98,58 +105,76 @@ lcd.message("Ready to start")
 while True:
     try:
         refreshLcd()
-        weight = hx.get_weight(5)
-        print(int(weight))
-        weightList = list()
-        weightList.extend(str(int(weight)))
-        weightList.append("g")
-
+        lcd.message("Press white\nbutton to begin")
+        
         if GPIO.input(WEIGH_BUTTON):
-            displayWeight(weightList)
-            print("Pressed White Button")
-        elif GPIO.input(SEND_DETAILS_BUTTON):
-            print("Pressed Yellow Button")
-            # Check if weight is not fluctuating and record the stable measurement
-            if weight >= 5:
-                if int(weight) != int(sameWeight):
-                    sameWeight = weight
-                    count = 0
-                else:
-                    count += 1
-                    print(count)
-                    if count > 6:
-                        count = 0
-
-                        refreshLcd()
-                        lcd.message("Processing...")
-
-                        # Call code to take photo
-                        captureImg()
-
-                        # Call code to send photo and weight details via POST request
-                        print("Sending weight and photo to server")
-                        sendImage(weight)
-
-                        refreshLcd()
-                        lcd.message("Information Sent")
-                        time.sleep(3)
-                        lcd.message("Check App for\nmore information")
-
-                        cleanAndExit()
+                runScales = True
+                print("Pressed the Weigh Button")
         elif GPIO.input(TARE_BUTTON):
-            print("Pressed Red Button")
-            hx.tare()
-        elif weight >= 0 and weight < 5:
+                print("Pressed the Tare Button")
+                exitProgram()
+        
+        while runScales:
             refreshLcd()
-            lcd.message("Place food\non scale")
+            
+            weight = hx.get_weight(5)
+            print(int(weight))
+            
+            weightList = list()
+            weightList.extend(str(int(weight)))
+            weightList.append("g")
+            
+            if int(weight) > 0: 
+                lcd.message(weightList)
 
-        hx.power_down()
-        hx.power_up()
-        time.sleep(0.5)
+            if GPIO.input(SEND_DETAILS_BUTTON):
+                print("Pressed the Send Details Button")
+                # Check if weight is not fluctuating and record the stable measurement
+                if weight >= 5:
+                    refreshLcd()
+                    lcd.message("Processing...")
+
+                    # Call code to take photo
+                    # captureImg()
+                    # Call code to send photo and weight details via POST request
+                    print("Sending weight and photo to server")
+                    sendImage(int(weight))
+
+                    refreshLcd()
+                    lcd.message("Information Sent")
+                    print("Information sent")
+                    time.sleep(3)
+                    refreshLcd()
+                    lcd.message("Check App for\nmore information")
+                    print("Check app")
+                    time.sleep(10)
+                    refreshLcd()
+
+                    runScales = False
+                else:
+                    print("Nothing on the scale")
+                    refreshLcd()
+                    lcd.message("No food found\non scale")
+                    
+            elif GPIO.input(TARE_BUTTON):
+                print("Pressed the Tare Button")
+                hx.tare()
+            
+            elif weight >= 0 and weight < 5:
+                refreshLcd()
+                lcd.message("Place food\non scale")
+                
+            if GPIO.input(WEIGH_BUTTON):
+                runScales = False
+                print("Stopping the weighing")
+                refreshLcd()
+                lcd.message("Restarting\nthe scale")
+                time.sleep(5)
+
+            hx.power_down()
+            hx.power_up()
+            time.sleep(0.5)
 
     except (KeyboardInterrupt, SystemExit):
-        refreshLcd()
-        lcd.message("Powering off...")
-        time.sleep(3)
-        refreshLcd()
-        cleanAndExit()
+        exitProgram()
+        
