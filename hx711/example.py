@@ -175,4 +175,3 @@ while True:
 
     except (KeyboardInterrupt, SystemExit):
         exitProgram()
-        
