@@ -126,7 +126,8 @@ while True:
                     time.sleep(3)
 
                     # Call code to take photo
-                    captureImg()
+                    #captureImg()
+                    refreshLcd()
                     lcd.message("Processing...")
                     # Call code to send photo and weight details via POST request
                     print("Sending weight and photo to server")
