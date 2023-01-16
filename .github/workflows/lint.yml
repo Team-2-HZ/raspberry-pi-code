@@ -1,17 +1,17 @@
-name: Python Linter
+name: Checks
+on: [pull_request]
 
-on: 
-  push:
-    branches:
-      - main
-      - dev
 jobs:
-  my_job:
+  build:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Checks
     steps:
-    - name: Python linters Black Check
-      uses: jose-lpa/python-black-check-action@1.0.0
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
       with:
-      # File or directory to run black on.
-        path: "hx711/example.py" 
+        python-version: 3.x
+    - run: pip install --upgrade pip
+    - run: pip install "black<23" pylint==v3.0.0a3 mypy==v0.902
+    - run: black --diff --check "hx711/example.py" 
+    - run: pylint --disable=all --enable=unused-import "hx711/example.py" 
+    - run: mypy --strict "hx711/example.py" 
