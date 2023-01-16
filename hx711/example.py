@@ -47,20 +47,18 @@ def refreshLcd():
     lcd.clear()
     lcd.home()
 
-
-# Display the weight value from the scale
-def displayWeight(weight):
+# Print a message on the LCD
+def displayMessage(message):
     refreshLcd()
-    lcd.message(weight)
+    lcd.message(message)
 
 # Powering down device and cleaning GPIO ports on exit    
 def exitProgram():
-    refreshLcd()
-    lcd.message("Powering off...")
+    displayMessage("Powering off...")
     time.sleep(3)
     refreshLcd()
     cleanAndExit()
-
+    
 # Identify the RPi pins connected to the scales
 hx = HX711(5, 6)
 
@@ -92,16 +90,15 @@ print("Tare done! Add weight now...")
 # The program loop when device is turned on
 while True:
     try:
-        refreshLcd()
-        lcd.message("Press white\nbutton to begin")
+        displayMessage("Press white\nbutton to begin")
         
         # Button command checks to activate the weighing functionality
         if GPIO.input(WEIGH_BUTTON):
                 runScales = True
                 print("Pressed the Start Weighing Button")
-        elif GPIO.input(TARE_BUTTON):
-                print("Pressed the Power Off Button")
-                exitProgram()
+        # elif GPIO.input(TARE_BUTTON):
+        #         print("Pressed the Power Off Button")
+        #         exitProgram()
         
         # Code for the scales' operation
         while runScales:
@@ -115,59 +112,59 @@ while True:
             weightList.append("g")
             
             if int(weight) > 0: 
-                lcd.message(weightList)
+                displayMessage(weightList)
+            elif weight >= 0 and weight < 5:
+                displayMessage("Place food\non scale")
 
             # Button command to capture an image and send the image and weight details to the APIs
             if GPIO.input(SEND_DETAILS_BUTTON):
                 print("Pressed the Send Details Button")
                 if weight >= 5:
-                    refreshLcd()
-                    lcd.message("Point Camera\nat food")
+                    displayMessage("Point Camera\nat food")
                     time.sleep(3)
 
                     # Call code to take photo
                     captureImg()
-                    refreshLcd()
-                    lcd.message("Processing...")
+                    displayMessage("Processing...")
                     # Call code to send photo and weight details via POST request
                     print("Sending weight and photo to server")
                     sendImage(int(weight))
 
-                    refreshLcd()
-                    lcd.message("Information Sent")
+                    displayMessage("Information Sent")
                     print("Information sent")
                     time.sleep(3)
-                    refreshLcd()
-                    lcd.message("Check app for\nmore information")
+                    displayMessage("Check app for\nmore information")
                     print("Check app")
                     time.sleep(10)
                     refreshLcd()
 
                     # Set the scales to inactive
                     runScales = False
-                    refreshLcd()
-                    lcd.message("Restarting\nthe scale")
+                    displayMessage("Restarting\nthe scale")
                     time.sleep(5)
                 else:
                     print("No food on the scale")
-                    refreshLcd()
-                    lcd.message("No food found\non the scale")
+                    displayMessage("No food found\non the scale")
             
             # Tare the scale weight, aka set value to zero        
             elif GPIO.input(TARE_BUTTON):
                 print("Pressed the Tare Button")
+                displayMessage("Setting Weight\nto Zero")
                 hx.tare()
             
-            elif weight >= 0 and weight < 5:
-                refreshLcd()
-                lcd.message("Place food\non scale")
+            # elif int(weight) < 0:
+            #     displayMessage("Weighing Error")
+            #     time.sleep(3)
+            #     displayMessage("Remove Item\nFrom Scale")
+            #     time.sleep(3)
+            #     displayMessage("Press Red Button\nTo Reset Scale")
+            #     time.sleep(3)
             
             # Set the scales to inactive    
             if GPIO.input(WEIGH_BUTTON):
                 runScales = False
                 print("Stopping the weighing")
-                refreshLcd()
-                lcd.message("Restarting\nthe scale")
+                displayMessage("Restarting\nthe scale")
                 time.sleep(5)
 
             hx.power_down()
