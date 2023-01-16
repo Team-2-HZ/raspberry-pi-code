@@ -161,7 +161,7 @@ while True:
             elif weight >= 0 and weight < 5:
                 refreshLcd()
                 lcd.message("Place food\non scale")
-            
+           
             # Set the scales to inactive    
             if GPIO.input(WEIGH_BUTTON):
                 runScales = False
