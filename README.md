@@ -1,14 +1,15 @@
-# raspberry-pi-code
+# Raspberry Pi Code
+
 All application code contained on the Raspberry Pi
 
 ## Contains:
 - HX711 sensor files
-- Execution code to activate scales and weigh
-
-## To be added:
+- Execution code to activate scales and weigh items
 - Raspberry Pi Camera connectivity
 - Image uploading to server
-- Main execution file, to centralise all feature commands
+- LCD Screen integration
+- Button integration
+
 
 ## Current process
 To run the Raspberry Pi scales, navigate into the `hx711` folder and execute the `example.py` file.
