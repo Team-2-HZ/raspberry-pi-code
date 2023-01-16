@@ -1,0 +1,17 @@
+name: Python Linter
+
+on: 
+  push:
+    branches:
+      - main
+      - dev
+jobs:
+  my_job:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+    - name: Python linters Black Check
+      uses: jose-lpa/python-black-check-action@1.0.0
+      with:
+      # File or directory to run black on.
+        path: "hx711/example.py" 
